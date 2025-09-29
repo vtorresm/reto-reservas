@@ -15,7 +15,10 @@ describe('RoomsService', () => {
         {
           provide: getRepositoryToken(Room),
           useValue: {
-            find: jest.fn().mockResolvedValue([{ id: 1, name: 'Sala A' }, { id: 2, name: 'Sala B' }]),
+            find: jest.fn().mockResolvedValue([
+              { id: 1, name: 'Sala A' },
+              { id: 2, name: 'Sala B' },
+            ]),
           },
         },
       ],

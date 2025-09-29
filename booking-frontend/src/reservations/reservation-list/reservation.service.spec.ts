@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { ReservationService } from './reservation.service';
+import { ReservationService } from '../reservation.service';
 
 describe('ReservationService', () => {
   let service: ReservationService;
@@ -21,7 +21,7 @@ describe('ReservationService', () => {
 
   it('should create a reservation', () => {
     const mockDto = { userId: 1, roomId: 1, date: '2025-09-30', startTime: '10:00', endTime: '11:00' };
-    service.create(mockDto).subscribe(response => {
+    service.create(mockDto).subscribe((response: any) => {
       expect(response).toBeTruthy();
     });
     const req = httpMock.expectOne(service['apiUrl']);
@@ -30,7 +30,7 @@ describe('ReservationService', () => {
   });
 
   it('should get all reservations', () => {
-    service.getAll().subscribe(reservations => {
+    service.getAll().subscribe((reservations: any[]) => {
       expect(reservations.length).toBe(0);
     });
     const req = httpMock.expectOne(service['apiUrl']);
