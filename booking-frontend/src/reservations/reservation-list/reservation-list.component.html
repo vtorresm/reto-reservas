@@ -1,0 +1,50 @@
+<mat-form-field>
+  <mat-label>Filter by Date</mat-label>
+  <input matInput [(ngModel)]="dateFilter" (change)="loadReservations()" placeholder="YYYY-MM-DD">
+</mat-form-field>
+
+<!-- Indicador de carga -->
+<div *ngIf="isLoading" style="text-align: center; padding: 20px;">
+  <mat-spinner diameter="40"></mat-spinner>
+  <p>Cargando reservas...</p>
+</div>
+
+<!-- Mensaje cuando no hay reservas -->
+<div *ngIf="showNoReservationsMessage && !isLoading" class="no-reservations-message">
+  <div class="info-card">
+    <div style="text-align: center; padding: 20px;">
+      <div style="font-size: 48px; color: #ccc; margin-bottom: 16px;">ℹ️</div>
+      <h3>Aún no hay salas reservadas</h3>
+      <p>No se encontraron reservas de salas en el sistema.</p>
+    </div>
+  </div>
+</div>
+
+<table mat-table [dataSource]="reservations" *ngIf="!showNoReservationsMessage && !isLoading">
+  <ng-container matColumnDef="id">
+    <th mat-header-cell *matHeaderCellDef> ID </th>
+    <td mat-cell *matCellDef="let element"> {{element.id}} </td>
+  </ng-container>
+  <ng-container matColumnDef="user">
+    <th mat-header-cell *matHeaderCellDef> User </th>
+    <td mat-cell *matCellDef="let element"> {{element.user.username}} </td>
+  </ng-container>
+  <ng-container matColumnDef="room">
+    <th mat-header-cell *matHeaderCellDef> Room </th>
+    <td mat-cell *matCellDef="let element"> {{element.room.name}} </td>
+  </ng-container>
+  <ng-container matColumnDef="date">
+    <th mat-header-cell *matHeaderCellDef> Date </th>
+    <td mat-cell *matCellDef="let element"> {{element.date | date}} </td>
+  </ng-container>
+  <ng-container matColumnDef="startTime">
+    <th mat-header-cell *matHeaderCellDef> Start </th>
+    <td mat-cell *matCellDef="let element"> {{element.startTime}} </td>
+  </ng-container>
+  <ng-container matColumnDef="endTime">
+    <th mat-header-cell *matHeaderCellDef> End </th>
+    <td mat-cell *matCellDef="let element"> {{element.endTime}} </td>
+  </ng-container>
+  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+</table>

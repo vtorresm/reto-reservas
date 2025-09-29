@@ -1,0 +1,55 @@
+<div class="login-container">
+  <div class="login-card">
+    <h2>Iniciar Sesión</h2>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+      <div class="form-group">
+        <label for="username">Nombre de Usuario:</label>
+        <input
+          type="text"
+          id="username"
+          formControlName="username"
+          [class.is-invalid]="loginForm.get('username')?.invalid && loginForm.get('username')?.touched"
+          placeholder="Ingrese su nombre de usuario"
+        >
+        <div *ngIf="loginForm.get('username')?.invalid && loginForm.get('username')?.touched" class="error-message">
+          El nombre de usuario es requerido
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Contraseña:</label>
+        <input
+          type="password"
+          id="password"
+          formControlName="password"
+          [class.is-invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+          placeholder="Ingrese su contraseña"
+        >
+        <div *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" class="error-message">
+          <div *ngIf="loginForm.get('password')?.errors?.['required']">La contraseña es requerida</div>
+          <div *ngIf="loginForm.get('password')?.errors?.['minlength']">La contraseña debe tener al menos 6 caracteres</div>
+        </div>
+      </div>
+
+      <div *ngIf="errorMessage" class="error-message alert-error">
+        {{ errorMessage }}
+      </div>
+
+      <button
+        type="submit"
+        class="btn-primary"
+        [disabled]="loginForm.invalid || isLoading"
+      >
+        <span *ngIf="isLoading">Cargando...</span>
+        <span *ngIf="!isLoading">Iniciar Sesión</span>
+      </button>
+
+      <div class="auth-links">
+        <p>¿No tienes una cuenta?
+          <a (click)="navigateToRegister()" style="cursor: pointer; color: #1976d2; text-decoration: none;">Regístrate aquí</a>
+        </p>
+      </div>
+    </form>
+  </div>
+</div>

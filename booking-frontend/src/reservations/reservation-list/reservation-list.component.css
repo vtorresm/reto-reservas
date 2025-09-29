@@ -1,0 +1,27 @@
+table {
+  width: 100%;
+}
+mat-form-field {
+  margin: 20px;
+}
+
+.no-reservations-message {
+  margin: 20px;
+}
+
+.info-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: #fafafa;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.info-card h3 {
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.info-card p {
+  color: #999;
+  margin: 0;
+}

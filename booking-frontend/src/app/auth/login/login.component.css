@@ -1,0 +1,127 @@
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+}
+
+.login-card {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  padding: 40px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.login-card h2 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 30px;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  color: #555;
+  font-weight: 500;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e1e1e1;
+  border-radius: 5px;
+  font-size: 16px;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.form-group input.is-invalid {
+  border-color: #dc3545;
+}
+
+.error-message {
+  color: #dc3545;
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+.alert-error {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 20px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  margin-top: 10px;
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.auth-links {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.auth-links p {
+  color: #666;
+  margin: 0;
+}
+
+.auth-links a {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.auth-links a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+  .login-container {
+    padding: 10px;
+  }
+
+  .login-card {
+    padding: 30px 20px;
+  }
+}

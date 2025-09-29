@@ -1,0 +1,144 @@
+.register-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.register-card {
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.register-card mat-card-header {
+  background: linear-gradient(135deg, #1976d2, #42a5f5);
+  color: white;
+  padding: 24px;
+  text-align: center;
+}
+
+.register-card mat-card-title {
+  font-size: 28px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.register-card mat-card-subtitle {
+  font-size: 16px;
+  opacity: 0.9;
+}
+
+.register-card mat-card-content {
+  padding: 32px;
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.button-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.register-button {
+  height: 48px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.login-button {
+  height: 48px;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #d32f2f;
+  background-color: #ffebee;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  border: 1px solid #ffcdd2;
+}
+
+.error-message mat-icon {
+  color: #d32f2f;
+}
+
+/* Responsive design */
+@media (max-width: 600px) {
+  .register-container {
+    padding: 16px;
+  }
+
+  .register-card mat-card-content {
+    padding: 24px 20px;
+  }
+
+  .register-card mat-card-header {
+    padding: 20px;
+  }
+
+  .register-card mat-card-title {
+    font-size: 24px;
+  }
+}
+
+/* Animaciones */
+.register-card {
+  animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.register-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
+  transition: all 0.3s ease;
+}
+
+.login-button:hover {
+  transform: translateY(-1px);
+  transition: all 0.3s ease;
+}
+
+/* Estilos para los íconos en los campos */
+mat-form-field mat-icon {
+  color: #666;
+}
+
+/* Estilos para el spinner de carga */
+mat-spinner {
+  margin: 0 auto;
+}

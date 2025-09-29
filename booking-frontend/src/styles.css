@@ -1,0 +1,65 @@
+/* You can add global styles to this file, and also import other style files */
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+/* Estilos personalizados para SweetAlert2 */
+.swal2-popup {
+  font-family: Roboto, "Helvetica Neue", sans-serif !important;
+  border-radius: 12px !important;
+}
+
+.swal2-title {
+  color: #333 !important;
+  font-weight: 500 !important;
+}
+
+.swal2-html-container {
+  color: #666 !important;
+}
+
+.swal2-confirm {
+  background-color: #1976d2 !important;
+  border-color: #1976d2 !important;
+  border-radius: 6px !important;
+  font-weight: 500 !important;
+  padding: 8px 24px !important;
+}
+
+.swal2-cancel {
+  background-color: #757575 !important;
+  border-color: #757575 !important;
+  color: white !important;
+  border-radius: 6px !important;
+  font-weight: 500 !important;
+  padding: 8px 24px !important;
+}
+
+.swal2-cancel:hover {
+  background-color: #616161 !important;
+  border-color: #616161 !important;
+}
+
+.swal2-success {
+  border-color: #4caf50 !important;
+}
+
+.swal2-success .swal2-success-ring {
+  border-color: #4caf50 !important;
+}
+
+.swal2-error {
+  border-color: #f44336 !important;
+}
+
+.swal2-warning {
+  border-color: #ff9800 !important;
+}
+
+.swal2-info {
+  border-color: #2196f3 !important;
+}
+
+.swal2-question {
+  border-color: #2196f3 !important;
+}
