@@ -11,8 +11,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { ReservationFormComponent } from '../reservations/reservation-form/reservation-form.component';
-import { ReservationService } from '../reservations/reservation.service';
+import { ReservationFormComponent } from '../app/reservations/reservation-form/reservation-form.component';
+import { ReservationService } from '../app/reservations/reservation.service';
 import { AlertService } from '../app/services/alert.service';
 
 describe('ReservationFormComponent', () => {

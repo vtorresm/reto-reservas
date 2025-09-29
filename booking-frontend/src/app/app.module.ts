@@ -14,8 +14,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatCardModule } from '@angular/material/card';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
-import { ReservationFormComponent } from '../reservations/reservation-form/reservation-form.component';
-import { ReservationListComponent } from '../reservations/reservation-list/reservation-list.component';
+import { ReservationFormComponent } from './reservations/reservation-form/reservation-form.component';
+import { ReservationListComponent } from './reservations/reservation-list/reservation-list.component';
 import { LoginComponent } from './auth/login/login.component';
 import { RegisterComponent } from './auth/register/register.component';
 
