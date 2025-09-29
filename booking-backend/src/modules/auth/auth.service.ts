@@ -1,4 +1,9 @@
-import { Injectable, UnauthorizedException, BadRequestException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  BadRequestException,
+  ConflictException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -15,15 +20,14 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async register(registerDto: RegisterDto): Promise<{ user: User; token: string }> {
+  async register(
+    registerDto: RegisterDto,
+  ): Promise<{ user: User; token: string }> {
     const { username, email, password } = registerDto;
 
     // Verificar si el usuario ya existe
     const existingUser = await this.userRepository.findOne({
-      where: [
-        { username },
-        { email }
-      ]
+      where: [{ username }, { email }],
     });
 
     if (existingUser) {
@@ -57,7 +61,7 @@ export class AuthService {
 
     return {
       user: userWithoutPassword as User,
-      token
+      token,
     };
   }
 
@@ -87,7 +91,7 @@ export class AuthService {
 
     return {
       user: userWithoutPassword as User,
-      token
+      token,
     };
   }
 

@@ -26,10 +26,7 @@ export class DatabaseSeedService {
       // Seed rooms
       const roomCount = await roomRepository.count();
       if (roomCount === 0) {
-        await roomRepository.save([
-          { name: 'Sala A' },
-          { name: 'Sala B' }
-        ]);
+        await roomRepository.save([{ name: 'Sala A' }, { name: 'Sala B' }]);
         console.log('✅ Salas iniciales creadas');
       }
 
@@ -38,7 +35,7 @@ export class DatabaseSeedService {
       if (userCount === 0) {
         await userRepository.save({
           username: 'user1',
-          email: 'user1@example.com'
+          email: 'user1@example.com',
         });
         console.log('✅ Usuario inicial creado');
       }

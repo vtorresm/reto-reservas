@@ -20,12 +20,20 @@ export class ReservationsService {
   async create(createDto: CreateReservationDto): Promise<Reservation> {
     const overlapping = await this.reservationRepository
       .createQueryBuilder('r')
-      .where('r.roomId = :roomId AND r.date = :date', { roomId: createDto.roomId, date: createDto.date })
-      .andWhere('(r.startTime < :endTime AND r.endTime > :startTime)', { startTime: createDto.startTime, endTime: createDto.endTime })
+      .where('r.roomId = :roomId AND r.date = :date', {
+        roomId: createDto.roomId,
+        date: createDto.date,
+      })
+      .andWhere('(r.startTime < :endTime AND r.endTime > :startTime)', {
+        startTime: createDto.startTime,
+        endTime: createDto.endTime,
+      })
       .getCount();
 
     if (overlapping > 0) {
-      throw new BadRequestException('No se puede reservar: solapamiento de horario');
+      throw new BadRequestException(
+        'No se puede reservar: solapamiento de horario',
+      );
     }
 
     const user = await this.userRepository.findOneBy({ id: createDto.userId });
