@@ -2,8 +2,39 @@ form {
   display: flex;
   flex-direction: column;
   max-width: 400px;
-  margin: 20px auto;
+  margin: 60px auto 40px auto; /* 60px top margin since toolbar is hidden */
+  padding: 20px;
+  background-color: transparent;
+  border-radius: 8px;
+  box-shadow: none;
 }
+
+.form-title {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.form-title h2 {
+  color: #1976d2;
+  margin: 0;
+  font-weight: 500;
+  font-size: 24px;
+}
+
+.form-title p {
+  color: #666;
+  margin: 8px 0 0 0;
+  font-size: 14px;
+}
+
 mat-form-field {
   margin-bottom: 10px;
+  width: 100%;
+}
+
+button[type="submit"] {
+  margin-top: 20px;
+  height: 50px;
+  font-size: 16px;
+  font-weight: 500;
 }

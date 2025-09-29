@@ -59,7 +59,7 @@
 
   .content {
     display: flex;
-    margin: 82px auto 32px;
+    margin: 0 auto;
     padding: 0 16px;
     max-width: 960px;
     flex-direction: column;
@@ -294,7 +294,7 @@
 </style>
 
 <!-- Toolbar -->
-<div class="toolbar" role="banner">
+<div class="toolbar" role="banner" *ngIf="showToolbar">
   <img
     width="40"
     alt="Angular Logo"
@@ -318,9 +318,7 @@
 </div>
 
 <div class="content" role="main">
-
-
-
+  <!-- Contenido de la aplicación cargado dinámicamente -->
 </div>
 
 

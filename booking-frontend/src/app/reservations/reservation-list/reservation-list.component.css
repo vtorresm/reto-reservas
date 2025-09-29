@@ -1,12 +1,22 @@
 table {
   width: 100%;
+  margin-top: 20px;
 }
+
 mat-form-field {
-  margin: 20px;
+  margin: 20px 0;
+  width: 200px;
 }
 
 .no-reservations-message {
-  margin: 20px;
+  margin: 40px 20px;
+  text-align: center;
+  color: #666;
+}
+
+.container {
+  margin-top: 80px; /* Account for header */
+  padding: 20px;
 }
 
 .info-card {

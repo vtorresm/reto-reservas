@@ -1,7 +1,8 @@
-<mat-form-field>
-  <mat-label>Filter by Date</mat-label>
-  <input matInput [(ngModel)]="dateFilter" (change)="loadReservations()" placeholder="YYYY-MM-DD">
-</mat-form-field>
+<div class="container">
+  <mat-form-field>
+    <mat-label>Filter by Date</mat-label>
+    <input matInput [(ngModel)]="dateFilter" (change)="loadReservations()" placeholder="YYYY-MM-DD">
+  </mat-form-field>
 
 <!-- Indicador de carga -->
 <div *ngIf="isLoading" style="text-align: center; padding: 20px;">
@@ -48,3 +49,4 @@
   <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
   <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
 </table>
+</div>
