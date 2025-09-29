@@ -1,0 +1,104 @@
+DIAGRAMA DE ARQUITECTURA PROPUESTA - SISTEMA DE RESERVAS DE SALAS
+=================================================================
+
+                    ┌─────────────────────────────────────┐
+                    │           CLIENTES WEB              │
+                    │   (Navegadores, Aplicaciones)      │
+                    └─────────────────┬───────────────────┘
+                                      │ HTTP/REST/WebSocket
+                                      ▼
+                    ┌─────────────────────────────────────┐
+                    │         API GATEWAY                 │
+                    │   - Enrutamiento de solicitudes     │
+                    │   - Autenticación/Autorización      │
+                    │   - Rate limiting                   │
+                    │   - Logging y monitoreo            │
+                    └─────────────────┬───────────────────┘
+                                      │ HTTP/gRPC
+                    ┌─────────────────┼───────────────────┐
+                    │                 │                   │
+        ┌───────────▼─────┐ ┌─────────▼──────┐ ┌────────▼────────┐
+        │                 │ │                │ │                 │
+    ┌───▼─────────────────┐ │ ┌─────────────┐ │ ┌─────────────┐   │
+    │                     │ │ │             │ │ │             │   │
+    │  MICROSERVICIO      │ │ │ MICROSERVICIO│ │ │ MICROSERVICIO│   │
+    │  DE USUARIOS        │◄┼─┤ DE RESERVAS  │◄┼─┤ DE SALAS    │   │
+    │                     │ │ │             │ │ │             │   │
+    │ - Gestión de users  │ │ │ - Crear      │ │ │ - CRUD de   │   │
+    │ - Autenticación      │ │ │ - Listar     │ │ │   salas     │   │
+    │ - Autorización      │ │ │ - Actualizar │ │ │ - Disponibi-│   │
+    │ - Perfiles          │ │ │ - Cancelar   │ │ │   lidad     │   │
+    └─────────────────────┘ │ └─────────────┘ │ └─────────────┘   │
+                            │                 │                   │
+                    ┌───────┼─────────────────┼───────────────────┐
+                    │       │                 │                   │
+                    ▼       ▼                 ▼                   ▼
+        ┌─────────────────────┐ ┌─────────────────────┐ ┌─────────────────────┐
+        │                     │ │                     │ │                     │
+        │  BASE DE DATOS      │ │  BASE DE DATOS      │ │  BASE DE DATOS      │
+        │  DE USUARIOS        │ │  DE RESERVAS        │ │  DE SALAS           │
+        │                     │ │                     │ │                     │
+        │ - Tabla: users      │ │ - Tabla: reservations│ │ - Tabla: rooms      │
+        │ - Tabla: roles      │ │ - Tabla: notifications│ │ - Tabla: resources  │
+        │ - Tabla: sessions   │ │ - Índices por fecha │ │ - Tabla: schedules  │
+        └─────────────────────┘ └─────────────────────┘ └─────────────────────┘
+
+COMUNICACIÓN INTERNA:
+===================
+- API Gateway ↔ Microservicios: HTTP/REST o gRPC
+- Microservicios ↔ Bases de Datos: Conexiones directas optimizadas
+- Microservicios ↔ Microservicios: Message Queue (RabbitMQ/Apache Kafka)
+- Sincronización: Event Sourcing con Apache Kafka
+
+SERVICIOS ADICIONALES:
+====================
+┌─────────────────────────────────────┐ ┌─────────────────────────────────────┐
+│         SERVICIO DE NOTIFICACIONES  │ │         SERVICIO DE REPORTES       │
+│   - Email/SMS/Push notifications   │ │   - Generación de reportes         │
+│   - Templates personalizables      │ │   - Analytics y métricas           │
+│   - Cola de mensajes               │ │   - Exportación PDF/Excel          │
+└─────────────────┬───────────────────┘ └─────────────────┬───────────────────┘
+                  │                                   │
+        ┌─────────▼─────────┐             ┌─────────────▼─────────────┐
+        │                   │             │                           │
+        │  MESSAGE BROKER   │◄────────────┤      CACHE REDIS          │
+        │  (RabbitMQ/Kafka) │             │   - Sesiones de usuario   │
+        │                   │             │   - Datos frecuentes      │
+        └───────────────────┘             │   - Invalidación          │
+                                          └───────────────────────────┘
+
+INFRAESTRUCTURA:
+===============
+┌─────────────────────────────────────┐ ┌─────────────────────────────────────┐
+│         DOCKER CONTAINERS          │ │         ORCHESTRATION              │
+│   - Microservicios containerizados │ │   - Kubernetes/Docker Swarm       │
+│   - Bases de datos en contenedores│ │   - Auto-scaling                  │
+│   - Configuración por ambiente    │ │   - Load balancing                │
+└─────────────────┬───────────────────┘ └─────────────────┬───────────────────┘
+                  │                                   │
+        ┌─────────▼─────────┐             ┌─────────────▼─────────────┐
+        │                   │             │                           │
+        │    REGISTRY       │             │      MONITORING           │
+        │   (Docker Hub/   │             │   - Prometheus            │
+        │    Private)       │             │   - Grafana               │
+        └───────────────────┘             │   - ELK Stack             │
+                                          └───────────────────────────┘
+
+SEGURIDAD:
+=========
+- JWT para autenticación stateless
+- OAuth2/OpenID Connect para integración externa
+- RBAC (Role-Based Access Control)
+- API Keys para servicios externos
+- Encriptación de datos sensibles
+- HTTPS/TLS en todas las comunicaciones
+- Firewalls y WAF (Web Application Firewall)
+
+FLUJO DE DATOS TÍPICO:
+====================
+1. Cliente → API Gateway (autenticación)
+2. API Gateway → Microservicio específico
+3. Microservicio → Base de Datos (lectura/escritura)
+4. Microservicio → Message Broker (eventos)
+5. Otros microservicios → Escuchan eventos → Actualizan sus datos
+6. Servicios de notificación → Procesan eventos → Envían notificaciones

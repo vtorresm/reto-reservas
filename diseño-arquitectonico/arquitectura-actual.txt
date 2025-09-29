@@ -1,0 +1,66 @@
+DIAGRAMA DE ARQUITECTURA ACTUAL - SISTEMA DE RESERVAS DE SALAS
+=============================================================
+
+                    ┌─────────────────────────────────────┐
+                    │           CLIENTES WEB              │
+                    │   (Navegadores, Aplicaciones)      │
+                    └─────────────────┬───────────────────┘
+                                      │ HTTP/REST
+                                      ▼
+                    ┌─────────────────────────────────────┐
+                    │         APLICACIÓN BACKEND          │
+                    │           NESTJS                    │
+                    └─────────────────┬───────────────────┘
+                                      │ HTTP/REST
+                    ┌─────────────────┼───────────────────┐
+                    │                 │                   │
+        ┌───────────▼─────┐ ┌─────────▼──────┐ ┌────────▼────────┐
+        │                 │ │                │ │                 │
+    ┌───▼─────────────────┐ │ ┌─────────────┐ │ ┌─────────────┐   │
+    │                     │ │ │             │ │ │             │   │
+    │   MÓDULO AUTH       │◄┼─┤ MÓDULO      │◄┼─┤ MÓDULO ROOMS │   │
+    │                     │ │ │ RESERVATIONS│ │ │             │   │
+    │ - Registro usuarios │ │ │             │ │ │ - Listar    │   │
+    │ - Login usuarios    │ │ │ - Crear     │ │ │   salas     │   │
+    │ - JWT tokens        │ │ │ - Listar    │ │ │             │   │
+    └─────────────────────┘ │ └─────────────┘ │ └─────────────┘   │
+                            │                 │                   │
+                    ┌───────┼─────────────────┼───────────────────┐
+                    │       │                 │                   │
+                    ▼       ▼                 ▼                   ▼
+        ┌─────────────────────────────────────────────────────────┐
+        │                                                         │
+        │              BASE DE DATOS POSTGRESQL                   │
+        │                                                         │
+        │  ┌─────────────┐ ┌─────────────┐ ┌───────────────────┐  │
+        │  │   users     │ │   rooms     │ │   reservations    │  │
+        │  │             │ │             │ │                   │  │
+        │  │ - id        │ │ - id        │ │ - id              │  │
+        │  │ - username  │ │ - name      │ │ - user_id         │  │
+        │  │ - email     │ │             │ │ - room_id         │  │
+        │  │ - password  │ │             │ │ - date            │  │
+        │  └─────────────┘ └─────────────┘ │ - start_time      │  │
+        │                                 │ - end_time        │  │
+        │                                 └───────────────────┘  │
+        └─────────────────────────────────────────────────────────┘
+
+COMUNICACIÓN INTERNA:
+===================
+- Cliente ↔ Backend: HTTP/REST directo con JWT
+- Backend ↔ Base de Datos: TypeORM con connection pooling
+- Módulos ↔ Módulos: Inyección de dependencias NestJS
+
+FLUJO DE DATOS TÍPICO:
+====================
+1. Cliente realiza petición HTTP al backend
+2. Controlador recibe la petición y valida JWT (si es necesario)
+3. Servicio procesa la lógica de negocio
+4. Servicio interactúa con la base de datos usando TypeORM
+5. Respuesta JSON fluye de vuelta al cliente
+
+SEGURIDAD ACTUAL:
+================
+- JWT para autenticación stateless
+- Validación de datos con class-validator y class-transformer
+- Sanitización de inputs
+- CORS configurado para http://localhost:4200
