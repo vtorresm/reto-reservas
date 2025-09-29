@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ReservationService } from '../reservation.service';
-import { AlertService } from '../../app/services/alert.service';
+import { AlertService } from '../../services/alert.service';
 
 @Component({
   selector: 'app-reservation-form',
