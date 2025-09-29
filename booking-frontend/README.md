@@ -111,11 +111,50 @@ El frontend se ejecutará en: `http://localhost:4200`
 }
 ```
 
+## 🧪 Pruebas Unitarias
+
+### Ejecutar pruebas
+```bash
+# Ejecutar todas las pruebas
+ng test
+
+# Ejecutar pruebas con cobertura
+ng test --code-coverage
+
+# Ejecutar pruebas en modo watch
+ng test --watch=false
+
+# Ejecutar pruebas específicas
+ng test --include="**/reservation-form.component.spec.ts"
+```
+
+### Pruebas implementadas
+
+#### ✅ Componente de Formulario de Reservas (`reservation-form.component.spec.ts`)
+- **Creación exitosa**: Prueba que una reserva se crea correctamente
+- **Manejo de errores**:
+  - Usuario no encontrado
+  - Sala no encontrada
+  - Conflicto de horario
+  - Errores genéricos
+- **Validación de formularios**: Campos requeridos y formato
+- **Navegación**: Redirección después del éxito
+- **Manejo de formularios inválidos**
+
+### Configuración de pruebas
+- **Karma** + **Jasmine** como framework
+- **Mocks** para servicios externos
+- **Spies** para métodos y llamadas HTTP
+- **Cobertura de casos de error**
+
 ## 🔧 Comandos Útiles
 
 ```bash
 # Instalar dependencias
 npm install
+
+# Instalar SweetAlert2
+npm install sweetalert2
 
 # Servidor de desarrollo
 ng serve --proxy-config proxy.conf.json
@@ -125,6 +164,9 @@ ng build
 
 # Tests unitarios
 ng test
+
+# Tests con cobertura
+ng test --code-coverage
 
 # Análisis de código
 ng lint
@@ -193,6 +235,12 @@ src/
 - **Mensajes de error**: Específicos para cada tipo de error
 - **Estilos personalizados**: Integrados con el tema de la aplicación
 
+### Pruebas Unitarias
+- **Framework**: Karma + Jasmine
+- **Cobertura**: Componentes y servicios principales
+- **Mocks**: Servicios externos y rutas
+- **Casos de error**: Manejados correctamente
+
 ## 🔧 Configuración Adicional
 
 ### Proxy para desarrollo
@@ -242,6 +290,34 @@ export const environment = {
 - **Tablets**: iPad, Android tablets
 - **Resolución mínima**: 320px de ancho
 
+## 🧪 Estrategia de Pruebas
+
+### Pruebas Unitarias Implementadas
+
+#### Backend (Jest)
+- **Servicio de Reservas**: Casos de éxito y error
+- **Mocks de repositorios**: TypeORM testing
+- **Casos límite**: Solapamiento exacto y parcial
+- **Validaciones**: Usuario y sala no encontrados
+
+#### Frontend (Karma + Jasmine)
+- **Componente de Formulario**: Validaciones y envío
+- **Manejo de errores**: Diferentes tipos de error
+- **Navegación**: Redirección automática
+- **Integración**: Servicios y routing
+
+### Comandos de Pruebas
+```bash
+# Backend
+npm run test          # Ejecutar pruebas
+npm run test:cov      # Con cobertura
+npm run test:watch    # Modo watch
+
+# Frontend
+ng test              # Ejecutar pruebas
+ng test --code-coverage  # Con cobertura
+```
+
 ## 🚀 Próximos Pasos
 
 - [ ] Implementar edición de reservas
@@ -250,11 +326,28 @@ export const environment = {
 - [ ] Agregar modo oscuro
 - [ ] Implementar tests E2E
 
+## 🧪 Casos de Prueba Implementados
+
+### Backend (NestJS)
+- ✅ **Creación correcta de reservas** sin conflictos de horario
+- ✅ **Conflicto por solapamiento** de horarios (parcial y exacto)
+- ✅ **Usuario no encontrado** - manejo de usuarios inexistentes
+- ✅ **Sala no encontrada** - manejo de salas inexistentes
+- ✅ **Listado de reservas** con y sin filtro de fecha
+
+### Frontend (Angular)
+- ✅ **Creación exitosa de reservas** con redirección
+- ✅ **Manejo de errores específicos** (usuario/sala no encontrada, conflicto)
+- ✅ **Validación de formularios** (campos requeridos, formato)
+- ✅ **Navegación automática** después del éxito
+- ✅ **Integración con SweetAlert2** para mensajes
+
 ## 📞 Soporte
 
-Para problemas o preguntas sobre el frontend:
+Para problemas o preguntas:
 1. Revisa la consola del navegador para errores
 2. Verifica que el backend esté ejecutándose en `http://localhost:3000`
 3. Comprueba la configuración del proxy
 4. Revisa los logs de Angular CLI
 5. **PostgreSQL**: Asegúrate de que esté ejecutándose y configurado correctamente en el backend
+6. **Pruebas**: Ejecuta `npm test` para verificar que todo funcione correctamente

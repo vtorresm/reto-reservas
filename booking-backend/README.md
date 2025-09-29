@@ -65,6 +65,40 @@ npm run start:dev
 | GET | `/users` | Listar usuarios |
 | GET | `/rooms` | Listar salas |
 
+## 🧪 Pruebas Unitarias
+
+### Ejecutar todas las pruebas
+```bash
+# Ejecutar pruebas unitarias
+npm run test
+
+# Ejecutar pruebas con cobertura
+npm run test:cov
+
+# Ejecutar pruebas en modo watch
+npm run test:watch
+
+# Ejecutar pruebas E2E
+npm run test:e2e
+```
+
+### Pruebas implementadas
+
+#### ✅ Servicio de Reservas (`reservations.service.spec.ts`)
+- **Creación exitosa**: Prueba que una reserva se crea correctamente sin conflictos
+- **Conflicto de horario**: Prueba que se lanza error cuando hay solapamiento
+- **Usuario no encontrado**: Prueba manejo de usuario inexistente
+- **Sala no encontrada**: Prueba manejo de sala inexistente
+- **Solapamiento parcial**: Prueba detección de solapamiento parcial de horarios
+- **Conflicto exacto**: Prueba detección de mismo horario exacto
+- **Listado de reservas**: Prueba filtrado por fecha y sin filtro
+
+### Configuración de pruebas
+- **Jest** como framework de pruebas
+- **Mocks** para repositorios TypeORM
+- **Casos de error** cubiertos
+- **Casos de éxito** validados
+
 ## 🔧 Comandos Útiles
 
 ```bash
@@ -83,8 +117,11 @@ npm run start:prod
 # Compilar
 npm run build
 
-# Tests
+# Ejecutar pruebas
 npm run test
+
+# Ejecutar pruebas con cobertura
+npm run test:cov
 ```
 
 ## 🗄️ Base de Datos
