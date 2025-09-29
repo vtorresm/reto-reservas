@@ -10,14 +10,17 @@ import { filter } from 'rxjs/operators';
 export class AppComponent {
   title = 'Reserva de Salas';
   showReservationButton = false;
+  showToolbar = true;
 
   constructor(private router: Router) {
-    // Escuchar cambios de ruta para mostrar/ocultar el botón
+    // Escuchar cambios de ruta para mostrar/ocultar el botón y toolbar
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event) => {
       if (event instanceof NavigationEnd) {
         this.showReservationButton = event.url === '/reservations/list';
+        // Ocultar toolbar solo en el formulario de reserva
+        this.showToolbar = event.url !== '/reservations/form';
       }
     });
   }
