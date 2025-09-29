@@ -33,8 +33,17 @@ npm install pg @types/pg
 ### 4. Configurar base de datos
 Crea un archivo `.env` en `booking-backend/`:
 ```env
+# Host del servidor
+DATABASE_HOST=localhost
 # Puerto del servidor
-PORT=3000
+DATABASE_PORT=5432
+# Usuario de la base de datos
+DATABASE_USERNAME=postgres
+# Contraseña de la base de datos
+DATABASE_PASSWORD=Tu_CONTRASEÑA_POSTGRES
+# Nombre de la base de datos
+DATABASE_NAME=booking_db
+
 
 # Configuración de PostgreSQL
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/booking_db
