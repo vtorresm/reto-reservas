@@ -13,9 +13,8 @@ export class DatabaseSeedService {
 
   async onModuleInit() {
     // Agregar un pequeño retraso para asegurar que TypeORM esté completamente inicializado
-    setTimeout(async () => {
-      await this.seedData();
-    }, 1000);
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await this.seedData();
   }
 
   private async seedData() {
