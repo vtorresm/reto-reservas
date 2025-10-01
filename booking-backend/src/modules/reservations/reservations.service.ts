@@ -50,7 +50,7 @@ export class ReservationsService {
     const reservation = this.reservationRepository.create({
       user,
       room,
-      date: new Date(createDto.date),
+      date: this.parseDate(createDto.date),
       startTime: createDto.startTime,
       endTime: createDto.endTime,
     });
@@ -59,9 +59,18 @@ export class ReservationsService {
   }
 
   async findAll(date?: string): Promise<Reservation[]> {
+    const whereCondition = date ? { date: this.parseDate(date) } : {};
     return this.reservationRepository.find({
       relations: ['user', 'room'],
-      where: date ? { date: new Date(date) } : {},
+      where: whereCondition,
     });
+  }
+
+  private parseDate(dateString: string): Date {
+    // Crear fecha en formato YYYY-MM-DD para evitar problemas de zona horaria
+    const [year, month, day] = dateString.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+    // Retornar la fecha en formato ISO para comparación consistente
+    return date;
   }
 }
