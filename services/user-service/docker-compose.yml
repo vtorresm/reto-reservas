@@ -1,0 +1,101 @@
+version: '3.8'
+
+services:
+  # Servicio principal
+  user-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: coworking-user-service
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - DB_HOST=user-db
+      - DB_PORT=5432
+      - DB_USERNAME=coworking_user
+      - DB_PASSWORD=coworking_password
+      - DB_DATABASE=coworking_users
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - JWT_SECRET=dev-jwt-secret-key-change-in-production
+      - FRONTEND_URL=http://localhost:4200
+    depends_on:
+      user-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./src:/app/src:ro
+      - ./dto:/app/dto:ro
+      - ./entities:/app/entities:ro
+      - ./.env:/app/.env:ro
+    networks:
+      - coworking-network
+
+  # Base de datos PostgreSQL
+  user-db:
+    image: postgres:15-alpine
+    container_name: coworking-user-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=coworking_user
+      - POSTGRES_PASSWORD=coworking_password
+      - POSTGRES_DB=coworking_users
+    ports:
+      - "5433:5432"
+    volumes:
+      - user_db_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U coworking_user -d coworking_users"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - coworking-network
+
+  # Redis para caché y sesiones
+  redis:
+    image: redis:7-alpine
+    container_name: coworking-redis
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --requirepass dev-redis-password
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - coworking-network
+
+  # Redis Commander (opcional, para debugging)
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: coworking-redis-commander
+    restart: unless-stopped
+    environment:
+      - REDIS_HOSTS=local:redis:6379:0:dev-redis-password
+    ports:
+      - "8081:8081"
+    depends_on:
+      - redis
+    networks:
+      - coworking-network
+
+volumes:
+  user_db_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  coworking-network:
+    driver: bridge
+    name: coworking-network

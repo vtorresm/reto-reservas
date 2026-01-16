@@ -1,0 +1,218 @@
+name: Microservicios CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'services/**'
+      - '.github/workflows/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'services/**'
+
+env:
+  REGISTRY: ghcr.io
+  NODE_VERSION: '18'
+
+jobs:
+  # Job de testing para todos los servicios
+  test:
+    name: Test Services
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [user-service, resource-service, booking-service, payment-service, notification-service, config-service, audit-service]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: services/${{ matrix.service }}/package-lock.json
+
+      - name: Install dependencies
+        working-directory: services/${{ matrix.service }}
+        run: npm ci
+
+      - name: Run linting
+        working-directory: services/${{ matrix.service }}
+        run: npm run lint
+
+      - name: Run tests
+        working-directory: services/${{ matrix.service }}
+        run: npm run test
+
+      - name: Build application
+        working-directory: services/${{ matrix.service }}
+        run: npm run build
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./services/${{ matrix.service }}/coverage/lcov.info
+          flags: ${{ matrix.service }}
+          name: ${{ matrix.service }}-coverage
+
+  # Job de construcción de imágenes Docker
+  build-and-push:
+    name: Build and Push Docker Images
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'push'
+    strategy:
+      matrix:
+        service: [user-service, resource-service, booking-service, payment-service, notification-service, config-service, audit-service]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.service }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: services/${{ matrix.service }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # Job de despliegue en staging
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+    environment: staging
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure kubectl
+        uses: azure/k8s-set-context@v3
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBE_CONFIG_STAGING }}
+
+      - name: Deploy services to staging
+        run: |
+          # Aplicar manifests de Kubernetes
+          kubectl apply -f k8s/staging/ --recursive
+
+          # Reiniciar deployments para aplicar nuevas imágenes
+          kubectl rollout restart deployment/user-service -n staging
+          kubectl rollout restart deployment/resource-service -n staging
+          kubectl rollout restart deployment/booking-service -n staging
+          kubectl rollout restart deployment/payment-service -n staging
+          kubectl rollout restart deployment/notification-service -n staging
+          kubectl rollout restart deployment/config-service -n staging
+          kubectl rollout restart deployment/audit-service -n staging
+
+          # Esperar a que los deployments estén listos
+          kubectl rollout status deployment/user-service -n staging --timeout=300s
+          kubectl rollout status deployment/resource-service -n staging --timeout=300s
+          kubectl rollout status deployment/booking-service -n staging --timeout=300s
+          kubectl rollout status deployment/payment-service -n staging --timeout=300s
+          kubectl rollout status deployment/notification-service -n staging --timeout=300s
+          kubectl rollout status deployment/config-service -n staging --timeout=300s
+          kubectl rollout status deployment/audit-service -n staging --timeout=300s
+
+  # Job de despliegue en producción
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure kubectl
+        uses: azure/k8s-set-context@v3
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBE_CONFIG_PRODUCTION }}
+
+      - name: Run smoke tests
+        run: |
+          # Ejecutar tests básicos antes del despliegue
+          curl -f https://api.staging.coworking.com/health || exit 1
+
+      - name: Deploy services to production
+        run: |
+          # Aplicar manifests de producción
+          kubectl apply -f k8s/production/ --recursive
+
+          # Despliegue blue-green para servicios críticos
+          kubectl set image deployment/user-service user-service=${{ env.REGISTRY }}/${{ github.repository }}/user-service:${{ github.sha }} -n production
+          kubectl set image deployment/resource-service resource-service=${{ env.REGISTRY }}/${{ github.repository }}/resource-service:${{ github.sha }} -n production
+          kubectl set image deployment/booking-service booking-service=${{ env.REGISTRY }}/${{ github.repository }}/booking-service:${{ github.sha }} -n production
+          kubectl set image deployment/payment-service payment-service=${{ env.REGISTRY }}/${{ github.repository }}/payment-service:${{ github.sha }} -n production
+          kubectl set image deployment/notification-service notification-service=${{ env.REGISTRY }}/${{ github.repository }}/notification-service:${{ github.sha }} -n production
+          kubectl set image deployment/config-service config-service=${{ env.REGISTRY }}/${{ github.repository }}/config-service:${{ github.sha }} -n production
+          kubectl set image deployment/audit-service audit-service=${{ env.REGISTRY }}/${{ github.repository }}/audit-service:${{ github.sha }} -n production
+
+          # Esperar a que los deployments estén listos
+          kubectl rollout status deployment/user-service -n production --timeout=600s
+          kubectl rollout status deployment/resource-service -n production --timeout=600s
+          kubectl rollout status deployment/booking-service -n production --timeout=600s
+          kubectl rollout status deployment/payment-service -n production --timeout=600s
+          kubectl rollout status deployment/notification-service -n production --timeout=600s
+          kubectl set image deployment/config-service config-service=${{ env.REGISTRY }}/${{ github.repository }}/config-service:${{ github.sha }} -n production
+          kubectl rollout status deployment/audit-service -n production --timeout=600s
+
+      - name: Post-deployment verification
+        run: |
+          # Verificar que todos los servicios estén saludables
+          curl -f https://api.coworking.com/health || exit 1
+
+          # Ejecutar tests básicos de integración
+          curl -f https://api.coworking.com/api/v1/health || exit 1
+
+  # Job de notificaciones
+  notify:
+    name: Notify Deployment Status
+    runs-on: ubuntu-latest
+    needs: [deploy-staging, deploy-production]
+    if: always()
+
+    steps:
+      - name: Notify success
+        if: needs.deploy-staging.result == 'success' || needs.deploy-production.result == 'success'
+        run: |
+          echo "✅ Despliegue exitoso en ${{ github.ref_name }}"
+
+      - name: Notify failure
+        if: failure()
+        run: |
+          echo "❌ Despliegue fallido en ${{ github.ref_name }}"
+          # Aquí puedes agregar integración con Slack, Teams, etc.

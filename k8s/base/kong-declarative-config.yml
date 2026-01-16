@@ -1,0 +1,286 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kong-declarative-config
+  labels:
+    app: kong-gateway
+data:
+  kong.yml: |
+    _format_version: "3.0"
+
+    # Servicios backend
+    services:
+    - name: user-service
+      url: http://user-service:80
+      routes:
+      - name: user-service-auth
+        paths:
+        - /api/v1/auth
+        methods:
+        - GET
+        - POST
+        - PUT
+        - PATCH
+        strip_path: false
+      - name: user-service-users
+        paths:
+        - /api/v1/users
+        methods:
+        - GET
+        - POST
+        - PUT
+        - PATCH
+        - DELETE
+        strip_path: false
+      - name: user-service-roles
+        paths:
+        - /api/v1/roles
+        methods:
+        - GET
+        - POST
+        - PUT
+        - PATCH
+        - DELETE
+        strip_path: false
+      plugins:
+      - name: jwt
+        config:
+          secret_is_base64: false
+      - name: cors
+        config:
+          origins:
+          - "https://app.coworking.com"
+          - "http://localhost:4200"
+          methods:
+          - GET
+          - POST
+          - PUT
+          - PATCH
+          - DELETE
+          headers:
+          - Accept
+          - Accept-Version
+          - Content-Length
+          - Content-MD5
+          - Content-Type
+          - Date
+          - X-Auth-Token
+          - Authorization
+          credentials: true
+      - name: rate-limiting
+        config:
+          minute: 100
+          limit_by: consumer
+          policy: local
+      - name: request-transformer
+        config:
+          add:
+            headers:
+            - "X-Service-Name:user-service"
+            - "X-Request-Source:api-gateway"
+
+    - name: resource-service
+      url: http://resource-service:80
+      routes:
+      - name: resource-service-routes
+        paths:
+        - /api/v1/resources
+        - /api/v1/categories
+        - /api/v1/availability
+        methods:
+        - GET
+        - POST
+        - PUT
+        - PATCH
+        - DELETE
+        strip_path: false
+      plugins:
+      - name: jwt
+      - name: cors
+        config:
+          origins:
+          - "https://app.coworking.com"
+          - "http://localhost:4200"
+      - name: rate-limiting
+        config:
+          minute: 200
+          limit_by: consumer
+      - name: request-transformer
+        config:
+          add:
+            headers:
+            - "X-Service-Name:resource-service"
+
+    - name: booking-service
+      url: http://booking-service:80
+      routes:
+      - name: booking-service-routes
+        paths:
+        - /api/v1/bookings
+        - /api/v1/calendar
+        - /api/v1/policies
+        methods:
+        - GET
+        - POST
+        - PUT
+        - PATCH
+        - DELETE
+        strip_path: false
+      plugins:
+      - name: jwt
+      - name: cors
+      - name: rate-limiting
+        config:
+          minute: 150
+          limit_by: consumer
+      - name: request-transformer
+        config:
+          add:
+            headers:
+            - "X-Service-Name:booking-service"
+
+    - name: payment-service
+      url: http://payment-service:80
+      routes:
+      - name: payment-service-routes
+        paths:
+        - /api/v1/payments
+        - /api/v1/invoices
+        - /api/v1/subscriptions
+        methods:
+        - GET
+        - POST
+        - PUT
+        - PATCH
+        - DELETE
+        strip_path: false
+      plugins:
+      - name: jwt
+      - name: cors
+      - name: rate-limiting
+        config:
+          minute: 50
+          limit_by: consumer
+      - name: request-transformer
+        config:
+          add:
+            headers:
+            - "X-Service-Name:payment-service"
+
+    - name: notification-service
+      url: http://notification-service:80
+      routes:
+      - name: notification-service-routes
+        paths:
+        - /api/v1/notifications
+        - /api/v1/community
+        - /api/v1/events
+        methods:
+        - GET
+        - POST
+        - PUT
+        - PATCH
+        - DELETE
+        strip_path: false
+      plugins:
+      - name: jwt
+      - name: cors
+      - name: rate-limiting
+        config:
+          minute: 100
+          limit_by: consumer
+      - name: request-transformer
+        config:
+          add:
+            headers:
+            - "X-Service-Name:notification-service"
+
+    - name: config-service
+      url: http://config-service:80
+      routes:
+      - name: config-service-routes
+        paths:
+        - /api/v1/config
+        - /api/v1/features
+        - /api/v1/settings
+        methods:
+        - GET
+        - POST
+        - PUT
+        - PATCH
+        - DELETE
+        strip_path: false
+      plugins:
+      - name: jwt
+      - name: cors
+      - name: rate-limiting
+        config:
+          minute: 30
+          limit_by: consumer
+      - name: request-transformer
+        config:
+          add:
+            headers:
+            - "X-Service-Name:config-service"
+
+    - name: audit-service
+      url: http://audit-service:80
+      routes:
+      - name: audit-service-routes
+        paths:
+        - /api/v1/audit
+        - /api/v1/logs
+        - /api/v1/reports
+        methods:
+        - GET
+        - POST
+        - PUT
+        - PATCH
+        - DELETE
+        strip_path: false
+      plugins:
+      - name: jwt
+      - name: cors
+      - name: rate-limiting
+        config:
+          minute: 20
+          limit_by: consumer
+      - name: request-transformer
+        config:
+          add:
+            headers:
+            - "X-Service-Name:audit-service"
+
+    # Consumidores (usuarios de la API)
+    consumers:
+    - username: coworking-frontend
+      jwt_secrets:
+      - key: frontend-jwt-key
+        secret: coworking-frontend-secret
+        algorithm: HS256
+
+    # Plugins globales
+    plugins:
+    - name: prometheus
+      config:
+        status_code_metrics: true
+        latency_metrics: true
+        bandwidth_metrics: true
+        upstream_health_metrics: true
+
+    - name: correlation-id
+      config:
+        header_name: X-Correlation-ID
+        generator: uuid
+        echo_downstream: true
+
+    - name: request-size-limiting
+      config:
+        allowed_payload_size: 10
+
+    - name: response-transformer
+      config:
+        add:
+          headers:
+          - "X-API-Gateway:Kong"
+          - "X-Response-Time: $upstream_response_time"

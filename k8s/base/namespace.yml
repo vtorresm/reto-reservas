@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: coworking
+  labels:
+    name: coworking
+    environment: base
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: coworking-staging
+  labels:
+    name: coworking-staging
+    environment: staging
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: coworking-production
+  labels:
+    name: coworking-production
+    environment: production

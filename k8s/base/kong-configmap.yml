@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kong-gateway-config
+  labels:
+    app: kong-gateway
+data:
+  # Configuración básica de Kong
+  KONG_DATABASE: "postgres"
+  KONG_DECLARATIVE_CONFIG: "/kong/declarative/kong.yml"
+
+  # Configuración de logging
+  KONG_LOG_LEVEL: "info"
+  KONG_NGINX_WORKER_PROCESSES: "2"
+
+  # Configuración de proxy
+  KONG_PROXY_ACCESS_LOG: "/dev/stdout"
+  KONG_PROXY_ERROR_LOG: "/dev/stderr"
+  KONG_ADMIN_ACCESS_LOG: "/dev/stdout"
+  KONG_ADMIN_ERROR_LOG: "/dev/stderr"
+
+  # Configuración de memoria
+  KONG_LUA_PACKAGE_PATH: "/opt/?.ljbc;/opt/?/init.ljbc"
+
+  # Configuración de plugins habilitados
+  KONG_PLUGINS: "bundled, jwt, key-auth, basic-auth, rate-limiting, cors, request-transformer, response-transformer, prometheus"
+
+  # Configuración de rate limiting global
+  KONG_NGINX_HTTP_LUA_SHARED_DICT: "prometheus_metrics 5m, rate_limiting_counters 12m"
+
+  # Configuración de salud
+  KONG_STATUS_LISTEN: "0.0.0.0:8100"
+
+  # Configuración de tracing
+  KONG_TRACING_INSTRUMENTATIONS: "off"
+  KONG_TRACING_SAMPLED: "0.1"

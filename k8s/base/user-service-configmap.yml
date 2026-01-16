@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-service-config
+  labels:
+    app: user-service
+data:
+  # Configuración de la aplicación
+  NODE_ENV: "production"
+  PORT: "3001"
+  API_PREFIX: "api/v1"
+
+  # Configuración de logs
+  LOG_LEVEL: "info"
+  LOG_FORMAT: "json"
+
+  # Configuración de CORS
+  CORS_ORIGIN: "https://app.coworking.com"
+
+  # Configuración de rate limiting
+  RATE_LIMIT_TTL: "900"
+  RATE_LIMIT_LIMIT: "100"
+
+  # Configuración de sesiones
+  SESSION_TIMEOUT: "3600"
+  MAX_SESSIONS_PER_USER: "5"
+
+  # Configuración de feature flags
+  FEATURE_SSO_GOOGLE: "true"
+  FEATURE_SSO_FACEBOOK: "true"
+  FEATURE_EMAIL_VERIFICATION: "true"
+  FEATURE_PHONE_VERIFICATION: "false"
+  FEATURE_TWO_FACTOR_AUTH: "false"
+
+  # Configuración de límites
+  MAX_LOGIN_ATTEMPTS: "5"
+  ACCOUNT_LOCK_TIME: "900"
+  PASSWORD_MIN_LENGTH: "8"
+  BCRYPT_SALT_ROUNDS: "12"
+
+  # Configuración de tracing
+  TRACING_ENABLED: "true"
+  TRACING_SERVICE_NAME: "user-service"
+
+  # Configuración de métricas
+  METRICS_ENABLED: "true"
+  METRICS_PORT: "9090"
+
+  # Configuración de Kafka
+  KAFKA_CLIENT_ID: "user-service"
+  KAFKA_GROUP_ID: "user-service-group"

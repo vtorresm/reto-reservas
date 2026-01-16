@@ -1,0 +1,148 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: kong-gateway-proxy
+  labels:
+    app: kong-gateway
+    component: proxy
+spec:
+  type: LoadBalancer
+  ports:
+  - name: proxy
+    port: 80
+    targetPort: 8000
+    protocol: TCP
+  - name: proxy-ssl
+    port: 443
+    targetPort: 8443
+    protocol: TCP
+  selector:
+    app: kong-gateway
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kong-gateway-admin
+  labels:
+    app: kong-gateway
+    component: admin
+spec:
+  type: ClusterIP
+  ports:
+  - name: admin
+    port: 8001
+    targetPort: 8001
+    protocol: TCP
+  - name: metrics
+    port: 9542
+    targetPort: 9542
+    protocol: TCP
+  selector:
+    app: kong-gateway
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kong-db
+  labels:
+    app: kong-db
+    component: database
+spec:
+  type: ClusterIP
+  ports:
+  - name: postgres
+    port: 5432
+    targetPort: 5432
+    protocol: TCP
+  selector:
+    app: kong-db
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kong-gateway-ingress
+  annotations:
+    kubernetes.io/ingress.class: "kong"
+    konghq.com/strip-path: "true"
+    konghq.com/preserve-host: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  ingressClassName: kong
+  tls:
+  - hosts:
+    - api.coworking.com
+    secretName: kong-gateway-tls
+  rules:
+  - host: api.coworking.com
+    http:
+      paths:
+      - path: /api/v1/auth
+        pathType: Prefix
+        backend:
+          service:
+            name: user-service
+            port:
+              number: 80
+      - path: /api/v1/users
+        pathType: Prefix
+        backend:
+          service:
+            name: user-service
+            port:
+              number: 80
+      - path: /api/v1/roles
+        pathType: Prefix
+        backend:
+          service:
+            name: user-service
+            port:
+              number: 80
+      - path: /api/v1/resources
+        pathType: Prefix
+        backend:
+          service:
+            name: resource-service
+            port:
+              number: 80
+      - path: /api/v1/bookings
+        pathType: Prefix
+        backend:
+          service:
+            name: booking-service
+            port:
+              number: 80
+      - path: /api/v1/payments
+        pathType: Prefix
+        backend:
+          service:
+            name: payment-service
+            port:
+              number: 80
+      - path: /api/v1/notifications
+        pathType: Prefix
+        backend:
+          service:
+            name: notification-service
+            port:
+              number: 80
+      - path: /api/v1/config
+        pathType: Prefix
+        backend:
+          service:
+            name: config-service
+            port:
+              number: 80
+      - path: /api/v1/audit
+        pathType: Prefix
+        backend:
+          service:
+            name: audit-service
+            port:
+              number: 80
+      - path: /health
+        pathType: Exact
+        backend:
+          service:
+            name: kong-gateway-admin
+            port:
+              number: 8001

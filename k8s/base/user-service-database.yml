@@ -1,0 +1,259 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service-db
+  labels:
+    app: user-service-db
+    component: database
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: user-service-db
+  template:
+    metadata:
+      labels:
+        app: user-service-db
+        component: database
+    spec:
+      containers:
+      - name: user-service-db
+        image: postgres:15-alpine
+        ports:
+        - containerPort: 5432
+          name: postgres
+          protocol: TCP
+        env:
+        - name: POSTGRES_DB
+          value: "coworking_users"
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: user-service-db-secret
+              key: username
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: user-service-db-secret
+              key: password
+        - name: PGDATA
+          value: "/var/lib/postgresql/data/pgdata"
+        volumeMounts:
+        - name: user-service-db-data
+          mountPath: /var/lib/postgresql/data
+        - name: user-service-db-init
+          mountPath: /docker-entrypoint-initdb.d
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          runAsUser: 999
+        livenessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - $(POSTGRES_USER)
+            - -d
+            - $(POSTGRES_DB)
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - $(POSTGRES_USER)
+            - -d
+            - $(POSTGRES_DB)
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+      volumes:
+      - name: user-service-db-data
+        persistentVolumeClaim:
+          claimName: user-service-db-pvc
+      - name: user-service-db-init
+        configMap:
+          name: user-service-db-init-config
+      securityContext:
+        fsGroup: 999
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-service-db
+  labels:
+    app: user-service-db
+    component: database
+spec:
+  type: ClusterIP
+  ports:
+  - name: postgres
+    port: 5432
+    targetPort: 5432
+    protocol: TCP
+  selector:
+    app: user-service-db
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: user-service-db-pvc
+  labels:
+    app: user-service-db
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: gp3
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: user-service-db-secret
+  labels:
+    app: user-service
+type: Opaque
+data:
+  # Credenciales de la base de datos del User Service
+  username: Y293b3JraW5nX3VzZXI=  # coworking_user (base64)
+  password: Y293b3JraW5nX3Bhc3N3b3Jk  # coworking_password (base64)
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-service-db-init-config
+  labels:
+    app: user-service-db
+data:
+  01-init-user-service-db.sql: |
+    -- Inicialización de la base de datos del User Service
+
+    -- Crear esquema si no existe
+    CREATE SCHEMA IF NOT EXISTS coworking;
+
+    -- Configurar parámetros de PostgreSQL para mejor rendimiento
+    SET timezone = 'UTC';
+
+    -- Crear extensiones útiles
+    CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+    CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
+    -- Crear índices adicionales para mejor rendimiento
+    CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_users_email_verified_status
+    ON users (email_verified, status)
+    WHERE email_verified = true AND status = 'active';
+
+    CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_users_last_login
+    ON users (last_login_at DESC)
+    WHERE last_login_at IS NOT NULL;
+
+    CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_sessions_token_active
+    ON sessions (token, is_active)
+    WHERE is_active = true;
+
+    CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_sessions_expires_at
+    ON sessions (expires_at)
+    WHERE expires_at > NOW();
+
+    -- Configurar permisos
+    GRANT USAGE ON SCHEMA coworking TO coworking_user;
+    GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA coworking TO coworking_user;
+    GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA coworking TO coworking_user;
+
+    -- Insertar roles por defecto
+    INSERT INTO roles (id, name, description, permissions, is_system_role, is_active, created_at, updated_at)
+    VALUES
+    (
+      uuid_generate_v4(),
+      'super_admin',
+      'Super Administrator con acceso completo',
+      ARRAY[
+        'user:read', 'user:write', 'user:delete',
+        'resource:read', 'resource:write', 'resource:delete',
+        'booking:read', 'booking:write', 'booking:delete', 'booking:approve',
+        'payment:read', 'payment:write', 'payment:refund',
+        'admin:access', 'audit:read', 'config:write'
+      ],
+      true,
+      true,
+      NOW(),
+      NOW()
+    ),
+    (
+      uuid_generate_v4(),
+      'admin',
+      'Administrador del coworking',
+      ARRAY[
+        'user:read', 'user:write',
+        'resource:read', 'resource:write',
+        'booking:read', 'booking:write', 'booking:approve',
+        'payment:read', 'payment:write',
+        'audit:read'
+      ],
+      true,
+      true,
+      NOW(),
+      NOW()
+    ),
+    (
+      uuid_generate_v4(),
+      'member',
+      'Miembro del coworking con acceso a reservas',
+      ARRAY[
+        'user:read',
+        'resource:read',
+        'booking:read', 'booking:write',
+        'payment:read'
+      ],
+      true,
+      true,
+      NOW(),
+      NOW()
+    ),
+    (
+      uuid_generate_v4(),
+      'guest',
+      'Usuario invitado con acceso limitado',
+      ARRAY[
+        'resource:read',
+        'booking:read'
+      ],
+      true,
+      true,
+      NOW(),
+      NOW()
+    )
+    ON CONFLICT (name) DO NOTHING;
+
+    -- Crear usuario administrador por defecto (contraseña: Admin123!)
+    INSERT INTO users (id, email, username, password, first_name, last_name, status, email_verified, role_id, created_at, updated_at)
+    SELECT
+      uuid_generate_v4(),
+      'admin@coworking.com',
+      'admin',
+      crypt('Admin123!', gen_salt('bf', 12)),
+      'Admin',
+      'Coworking',
+      'active',
+      true,
+      r.id,
+      NOW(),
+      NOW()
+    FROM roles r
+    WHERE r.name = 'super_admin'
+    ON CONFLICT (email) DO NOTHING;
