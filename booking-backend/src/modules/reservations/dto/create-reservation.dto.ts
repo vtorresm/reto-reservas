@@ -1,21 +1,32 @@
-import { IsNumber, IsDateString, IsString } from 'class-validator';
-import { Type } from 'class-transformer';
+import { IsString, IsDateString, IsString as IsStringValidator, IsOptional, IsInt, Min, Max } from 'class-validator';
 
 export class CreateReservationDto {
-  @IsNumber()
-  @Type(() => Number)
-  userId: number;
+  @IsString()
+  userId: string;
 
-  @IsNumber()
-  @Type(() => Number)
-  roomId: number;
+  @IsString()
+  roomId: string;
 
   @IsDateString()
   date: string;
 
-  @IsString()
+  @IsStringValidator()
   startTime: string;
 
-  @IsString()
+  @IsStringValidator()
   endTime: string;
+
+  @IsOptional()
+  @IsStringValidator()
+  notes?: string;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  attendees?: number;
+
+  @IsOptional()
+  @IsStringValidator()
+  title?: string;
 }
